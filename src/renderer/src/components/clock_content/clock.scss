@@ -1,0 +1,88 @@
+@import 'vars';
+@import 'mixin';
+
+// body {
+//   height: 100vh;
+//   @include flex();
+
+// }
+.clock_card{
+  display: flex;
+  p::after {
+    content: ':';
+    @include size(.5em, $height);
+    font: bold $height arial;
+    display: block;
+    color: $color;
+    line-height: $height;
+    text-align: center;
+  }
+  .box {
+    @include size($width, $height);
+    position: relative;
+    perspective: 200px;
+    margin: 0 0.1em;
+    div {
+        color: $color;
+        position: absolute;
+
+        &::before,
+        &::after {
+          display: block;
+          @include size($width, calc($height/2));
+          font: bold $height arial;
+          overflow: hidden;
+          text-align: center;
+          background-color: $bgColor;
+          border-radius: 5px;
+        }
+
+        &::before {
+          content: attr(data-after);
+          // background-color: aqua;
+          line-height: $height;
+        }
+
+        &::after {
+          content: attr(data-before);
+          // background-color: blueviolet;
+          line-height: 0;
+        }
+
+        &:nth-child(2) {
+          @include size($width, calc($height/2));
+          backface-visibility: hidden;
+
+          transition: .5s;
+          transform-origin: bottom;
+
+          &::before {
+            transform: rotateX(180deg);
+            line-height: 0;
+          }
+
+          &::after {
+            transform: translateY(-100%);
+            line-height: $height;
+          }
+        }
+      }
+
+      // &:hover {
+      //   div:nth-child(2) {
+      //     transform: rotateX(-180deg);
+      //   }
+      // }
+      div:nth-child(2).flipDown {
+        animation-name: flipDown;
+        animation-duration: 0.6s;
+        animation-fill-mode: both;
+      }
+  }
+}
+
+@keyframes flipDown {
+  to {
+    transform: rotateX(-180deg);
+  }
+}
