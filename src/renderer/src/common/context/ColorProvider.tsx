@@ -1,4 +1,5 @@
-import { ReactNode, createContext, useContext, useState } from 'react'
+import { ReactNode, createContext, useContext, useEffect, useState } from 'react'
+import { initColor } from '../config'
 
 interface IColor {
   bgColor: string
@@ -15,9 +16,27 @@ const ColorContext = createContext<IColor>({
 })
 
 const ColorProvider = ({ children }: { children: ReactNode }): ReactNode => {
-  const [bgColor, setBgColor] = useState('#fff')
-  const [fontColor, setFontColor] = useState('#000')
+  const [bC, fC] = initColor
+  const [bgColor, setBgColor] = useState(bC)
+  const [fontColor, setFontColor] = useState(fC)
 
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    window.electron.ipcRenderer.on('get_color', (data: any) => {
+      console.log(data)
+      setBgColor(data.bgColor)
+      setFontColor(data.fontColor)
+    })
+
+    window.electron.ipcRenderer.invoke('init_color', { bC, fC }).then((res) => {
+      if (res) {
+        setBgColor(`${res.bgColor}`)
+        setFontColor(`${res.fontColor}`)
+      }
+    })
+
+    return () => window.electron.ipcRenderer.removeAllListeners('get_color')
+  }, [])
   const changeBgColor = (color: string): void => setBgColor(color)
   const changeFontColor = (color: string): void => setFontColor(color)
 

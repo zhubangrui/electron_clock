@@ -5,7 +5,11 @@ interface IProps {
   closeTool: () => void
 }
 const ConfigContent: FC<IProps> = ({ closeTool }): ReactNode => {
-  const { fontColor, bgColor, changeBgColor, changeFontColor } = useColor()
+  const { fontColor, bgColor } = useColor()
+  const changeHandle = (e: string, type: string): void => {
+    // changeBgColor(e)
+    window.electron.ipcRenderer.send('change_color', { type, color: e })
+  }
 
   return (
     <>
@@ -15,8 +19,16 @@ const ConfigContent: FC<IProps> = ({ closeTool }): ReactNode => {
           X
         </div>
       </div>
-      <ColorCard title="翻转背景颜色：" color={bgColor} changeColor={(e) => changeBgColor(e)} />
-      <ColorCard title="时钟数字颜色：" color={fontColor} changeColor={(e) => changeFontColor(e)} />
+      <ColorCard
+        title="翻转背景颜色："
+        color={bgColor}
+        changeColor={(e) => changeHandle(e, 'bg_color')}
+      />
+      <ColorCard
+        title="时钟数字颜色："
+        color={fontColor}
+        changeColor={(e) => changeHandle(e, 'font_color')}
+      />
     </>
   )
 }

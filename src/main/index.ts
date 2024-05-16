@@ -1,7 +1,17 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { Database } from 'sqlite3'
+
+const dbPath = app.isPackaged
+  ? join(process.resourcesPath, 'resources')
+  : join(__dirname, '../../resources/')
+
+const db = new Database(dbPath + 'data_base.db')
+db.run(
+  'CREATE TABLE IF NOT EXISTS color_config (id INTEGER PRIMARY KEY, font_color TEXT, bg_color TEXT) '
+)
 
 // app.disableHardwareAcceleration() // 禁用硬件加速,主要是解决实时展示当前时间时，数字有残影的问题
 let mainWindow
@@ -47,9 +57,14 @@ function createWindow(): void {
   }
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+const showDialog = (msg: string): void => {
+  dialog.showMessageBox({
+    type: 'info',
+    message: msg,
+    buttons: ['确定']
+  })
+}
+
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
@@ -65,9 +80,91 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
+
   ipcMain.handle('mouse_move', (_, args) => {
     mainWindow?.setIgnoreMouseEvents(args)
     return args
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getData = (): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      db.all('select id,bg_color,font_color from color_config', (err, row) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(row)
+        }
+      })
+    })
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const insertData = (bgColor: string, fontColor: string): Promise<any> => {
+    return new Promise((resolve, reject) => {
+      db.run(
+        'insert into color_config (bg_color,font_color)values(?,?)',
+        [bgColor, fontColor],
+        (err) => {
+          if (err) {
+            reject(err.message)
+          } else {
+            resolve(true)
+          }
+        }
+      )
+    })
+  }
+  ipcMain.handle('init_color', async (_, data) => {
+    const { bgColor, fontColor } = data
+    try {
+      const row = await getData()
+      if (row.length === 0) {
+        try {
+          await insertData(bgColor, fontColor)
+          return []
+        } catch (err) {
+          showDialog('数据初始化异常')
+          return false
+        }
+      } else {
+        const { bg_color, font_color } = row[0]
+        return { bgColor: bg_color, fontColor: font_color }
+      }
+    } catch (err) {
+      showDialog(`${err}`)
+      return false
+    }
+  })
+  ipcMain.on('change_color', async (event, data) => {
+    const { type, color } = data
+    let field = ''
+    if (type === 'bg_color') {
+      field = 'bg_color'
+    } else if (type === 'font_color') {
+      field = 'font_color'
+    }
+    try {
+      //查询数据是否存
+      const row = await getData()
+      if (row.length === 0) {
+        showDialog('没有数据，更改失败')
+      } else {
+        db.run(`update color_config set ${field}=? where id = ?`, [color, 1], async (err) => {
+          if (err) {
+            showDialog('更改失败')
+          } else {
+            //再次查询，将数据返回
+            const res = await getData()
+            const { bg_color, font_color } = res[0]
+
+            event.reply('get_color', { bgColor: bg_color, fontColor: font_color })
+          }
+        })
+      }
+    } catch (err) {
+      showDialog(`${err}`)
+    }
   })
 
   app.on('activate', function () {
@@ -82,6 +179,7 @@ app.whenReady().then(() => {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
+    if (db) db.close()
     app.quit()
   }
 })
