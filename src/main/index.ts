@@ -4,11 +4,12 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
 // app.disableHardwareAcceleration() // 禁用硬件加速,主要是解决实时展示当前时间时，数字有残影的问题
+let mainWindow
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 280,
-    height: 56,
+  mainWindow = new BrowserWindow({
+    width: 310,
+    height: 420,
     show: false,
     autoHideMenuBar: true, //隐藏菜单
     resizable: false, //设置不能改变大小
@@ -64,6 +65,10 @@ app.whenReady().then(() => {
   ipcMain.on('ping', () => console.log('pong'))
 
   createWindow()
+  ipcMain.handle('mouse_move', (_, args) => {
+    mainWindow?.setIgnoreMouseEvents(args)
+    return args
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

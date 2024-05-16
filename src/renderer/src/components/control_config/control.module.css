@@ -1,0 +1,26 @@
+.container {
+  @apply absolute top-0 w-full text-white;
+}
+
+.container .top {
+  @apply w-full h-[55px] flex justify-between;
+}
+
+.container .top .left {
+  @apply flex-1;
+}
+
+.container .top .right {
+  @apply w-[30px];
+}
+
+.container .top .right .tools {
+  @apply inline-flex bg-slate-100 ml-[2px] p-[2px] select-none cursor-pointer;
+  border-radius: 3px;
+  -webkit-app-region: no-drag;
+}
+
+.container .config_cont {
+  @apply absolute top-[58px] left-0 bg-slate-400 w-full h-[360px] overflow-y-auto px-4 select-none;
+  border-radius: 5px;
+}

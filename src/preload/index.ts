@@ -1,22 +1,32 @@
-import { contextBridge } from 'electron'
-import { electronAPI } from '@electron-toolkit/preload'
+// Disable no-unused-vars, broken for spread args
+/* eslint no-unused-vars: off */
+import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 
-// Custom APIs for renderer
-const api = {}
+export type Channels = ''
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
-if (process.contextIsolated) {
-  try {
-    contextBridge.exposeInMainWorld('electron', electronAPI)
-    contextBridge.exposeInMainWorld('api', api)
-  } catch (error) {
-    console.error(error)
+const electronHandler = {
+  ipcRenderer: {
+    send(channel: Channels, ...args: unknown[]): void {
+      ipcRenderer.send(channel, ...args)
+    },
+
+    on(channel: Channels, func: (...args: unknown[]) => void): () => Electron.IpcRenderer {
+      const subscription = (_event: IpcRendererEvent, ...args: unknown[]): void => func(...args)
+      ipcRenderer.on(channel, subscription)
+
+      return (): Electron.IpcRenderer => ipcRenderer.removeListener(channel, subscription)
+    },
+
+    invoke(channel: Channels, ...args: unknown[]): Promise<Electron.IpcRenderer> {
+      return ipcRenderer.invoke(channel, ...args)
+    },
+
+    once(channel: Channels, func: (...args: unknown[]) => void): void {
+      ipcRenderer.once(channel, (_event, ...args) => func(...args))
+    }
   }
-} else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI
-  // @ts-ignore (define in dts)
-  window.api = api
 }
+
+contextBridge.exposeInMainWorld('electron', electronHandler)
+
+export type ElectronHandler = typeof electronHandler

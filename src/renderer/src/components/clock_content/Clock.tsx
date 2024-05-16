@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useRef, useState } from 'react'
 // import './base.css'
 import './clock.scss'
+import { useColor } from '@renderer/common/context/ColorProvider'
 
 const getSliceTime = (): number[] => {
   return new Date()
@@ -14,6 +15,8 @@ const Clock = (): ReactNode => {
   const [timeSplice, setTimeSplice] = useState<number[]>([])
 
   const contentRef = useRef<HTMLDivElement>(null)
+
+  const { bgColor, fontColor } = useColor()
 
   //获取前一个数字和后一个数字
   const getNextNumber = (index: number): [number, number] => {
@@ -97,30 +100,18 @@ const Clock = (): ReactNode => {
     return () => clearInterval(timer)
   }, [])
 
-  // useEffect(() => {
-  //   const timer = setInterval(() => {
-  //     if (prevCount === 8) {
-  //       clearInterval(timer)
-  //     } else {
-  //       setPrevCount(count) // 存储前一个计数值
-  //       setCount((prevCount) => prevCount + 1) // 更新当前计数值
-  //       divRef.current!.classList.add('flipDown')
-  //     }
-  //   }, 1000)
-
-  //   // const f = (): void => {
-  //   //   divRef.current!.classList.remove('flipDown')
-  //   // }
-  //   // divRef.current!.addEventListener('animationend', f)
-  //   return () => {
-  //     clearInterval(timer)
-  //     // divRef.current!.removeEventListener('animationend', f)
-  //   }
-  // }, [prevCount, count, divRef.current])
+  type IStyle = {
+    [key: string]: string
+  }
+  const configStyle: IStyle = {
+    display: 'flex',
+    '--color': fontColor,
+    '--color-background': bgColor
+  }
 
   return (
     <>
-      <div ref={contentRef} style={{ display: 'flex' }}></div>
+      <div ref={contentRef} style={configStyle}></div>
     </>
   )
 }

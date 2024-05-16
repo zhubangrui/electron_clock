@@ -10,7 +10,7 @@
   display: flex;
   p::after {
     content: ':';
-    @include size(.5em, $height);
+    @include size(.5em, height);
     font: bold $height arial;
     display: block;
     color: $color;

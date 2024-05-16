@@ -1,14 +1,14 @@
-// import ClockContent from './components/ClockContent/ClockContent'
 import Clock from './components/clock_content/Clock'
+import ControlConfig from './components/control_config/ControlConfig'
 
 function App(): JSX.Element {
   // const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   return (
-    <>
-      {/* <ClockContent /> */}
+    <div style={{ position: 'relative' }}>
       <Clock />
-    </>
+      <ControlConfig />
+    </div>
   )
 }
 

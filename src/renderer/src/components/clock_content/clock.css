@@ -5,10 +5,10 @@
 .clock_card p::after {
   content: ':';
   width: 0.5em;
-  height: 50px;
+  height: height;
   font: bold 50px arial;
   display: block;
-  color: #000;
+  color: var(--color);
   line-height: 50px;
   text-align: center;
 }
@@ -22,7 +22,7 @@
 }
 
 .clock_card .box div {
-  color: #000;
+  color: var(--color);
   position: absolute;
 }
 
@@ -33,7 +33,7 @@
   font: bold 50px arial;
   overflow: hidden;
   text-align: center;
-  background-color: #eee;
+  background-color: var(--color-background);
   border-radius: 5px;
 }
 
