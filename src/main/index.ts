@@ -122,7 +122,7 @@ app.whenReady().then(() => {
       if (row.length === 0) {
         try {
           await insertData(bgColor, fontColor)
-          return []
+          return { bgColor, fontColor }
         } catch (err) {
           showDialog('数据初始化异常')
           return false

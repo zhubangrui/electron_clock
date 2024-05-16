@@ -28,7 +28,7 @@ const ColorProvider = ({ children }: { children: ReactNode }): ReactNode => {
       setFontColor(data.fontColor)
     })
 
-    window.electron.ipcRenderer.invoke('init_color', { bC, fC }).then((res) => {
+    window.electron.ipcRenderer.invoke('init_color', { bgColor: bC, fontColor: fC }).then((res) => {
       if (res) {
         setBgColor(`${res.bgColor}`)
         setFontColor(`${res.fontColor}`)
