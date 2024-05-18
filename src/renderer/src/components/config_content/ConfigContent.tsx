@@ -1,11 +1,14 @@
 import { FC, ReactNode } from 'react'
 import ColorCard from './components/color_card/ColorCard'
 import { useColor } from '@renderer/common/context/ColorProvider'
+import Mp3 from '../../assets/bell.wav'
+import { useSound } from '@renderer/hooks/useSound'
 interface IProps {
   closeTool: () => void
 }
 const ConfigContent: FC<IProps> = ({ closeTool }): ReactNode => {
   const { fontColor, bgColor } = useColor()
+  const { playSound, stopSound } = useSound(Mp3)
   const changeHandle = (e: string, type: string): void => {
     // changeBgColor(e)
     window.electron.ipcRenderer.send('change_color', { type, color: e })
@@ -29,6 +32,13 @@ const ConfigContent: FC<IProps> = ({ closeTool }): ReactNode => {
         color={fontColor}
         changeColor={(e) => changeHandle(e, 'font_color')}
       />
+      <div className=" flex mt-3">
+        背景音效测试：
+        <button onClick={playSound} className="mr-5">
+          播放
+        </button>
+        <button onClick={stopSound}>停止</button>
+      </div>
     </>
   )
 }

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -12,12 +12,12 @@ const db = new Database(dbPath + 'data_base.db')
 db.run(
   'CREATE TABLE IF NOT EXISTS color_config (id INTEGER PRIMARY KEY, font_color TEXT, bg_color TEXT) '
 )
-
+Menu.setApplicationMenu(null)
 // app.disableHardwareAcceleration() // 禁用硬件加速,主要是解决实时展示当前时间时，数字有残影的问题
-let mainWindow
+
 function createWindow(): void {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 310,
     height: 420,
     show: false,
@@ -81,8 +81,10 @@ app.whenReady().then(() => {
 
   createWindow()
 
-  ipcMain.handle('mouse_move', (_, args) => {
-    mainWindow?.setIgnoreMouseEvents(args)
+  //动态改变窗口穿透区域
+  ipcMain.handle('mouse_move', (enent, args) => {
+    const win = BrowserWindow.fromWebContents(enent.sender)
+    win?.setIgnoreMouseEvents(args)
     return args
   })
 

@@ -58,9 +58,11 @@ const ControlConfig = (): ReactNode => {
         </div>
       </div>
       <div className=" h-[360px]" style={{ display: !open ? 'block' : 'none' }} ref={contRef}></div>
-      <div className={styles.config_cont} style={{ display: open ? 'block' : 'none' }}>
-        <ConfigContent closeTool={closeTool} />
-      </div>
+      {open && (
+        <div className={styles.config_cont}>
+          <ConfigContent closeTool={closeTool} />
+        </div>
+      )}
     </div>
   )
 }
